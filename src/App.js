@@ -1,25 +1,42 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState,} from "react";
+import PostalCodeForm from "./components/PostalCodeForm";
+import LocationInfo from "./components/LocationInfo";
+import axios from "axios";
+import './App.css'
 
-function App() {
+const App = () => {
+  const [locationData, setLocationData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const fetchLocationData = async (postalCode) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.get(`https://api.zippopotam.us/in/${postalCode}`);
+      const data = response.data;
+      console.log(data);
+      setLocationData({
+        country: data.country,
+        country_abbreviation: data["country abbreviation"],
+        places: data.places,
+      });
+    } catch (error) {
+      setError("Error fetching data. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <h1>Zip Code Information App - LEAD School</h1>
+      <PostalCodeForm onFormSubmit={fetchLocationData} />
+      {loading && <p>Loading...</p>}
+      {error && <p>{error}</p>}
+      <LocationInfo locationData={locationData} />
     </div>
   );
-}
+};
 
-export default App;
+export default App;  
